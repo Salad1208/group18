@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCertify - Academic Transcript Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles if needed */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as a default modern font */
+        }
+        .tab-button.active {
+            border-bottom-width: 2px;
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+        }
+        .form-section {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Styling for dynamically added course rows */
+        .course-row {
+            display: flex;
+            gap: 0.5rem; /* 8px */
+            align-items: center;
+            margin-bottom: 0.5rem; /* 8px */
+        }
+        .course-row input {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-blue-600 text-white p-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold">UniCertify</h1>
+            <p class="text-sm">Secure Academic Record Management</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto flex justify-center">
+            <button id="tab-institution" class="tab-button py-4 px-6 text-gray-600 hover:text-blue-500 focus:outline-none active">
+                <i class="fas fa-university mr-2"></i>Institution Portal
+            </button>
+            <button id="tab-student" class="tab-button py-4 px-6 text-gray-600 hover:text-blue-500 focus:outline-none">
+                <i class="fas fa-user-graduate mr-2"></i>Student Portal
+            </button>
+            <button id="tab-employer" class="tab-button py-4 px-6 text-gray-600 hover:text-blue-500 focus:outline-none">
+                <i class="fas fa-briefcase mr-2"></i>Employer Portal
+            </button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <div id="content-institution" class="form-section">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-blue-600 mb-6">Issue New Academic Transcript</h2>
+
+                <form id="issueTranscriptForm" class="space-y-6">
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-medium text-gray-700 px-2">Student Information</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="studentName" class="block text-sm font-medium text-gray-700 mb-1">Student Full Name</label>
+                                <input type="text" id="studentName" name="studentName" required class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Jane Doe">
+                            </div>
+                            <div>
+                                <label for="studentId" class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                                <input type="text" id="studentId" name="studentId" required class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., STU12345">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-medium text-gray-700 px-2">Academic Details</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="issuingInstitution" class="block text-sm font-medium text-gray-700 mb-1">Issuing Institution</label>
+                                <input type="text" id="issuingInstitution" name="issuingInstitution" required class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., City University">
+                            </div>
+                            <div>
+                                <label for="programName" class="block text-sm font-medium text-gray-700 mb-1">Program/Degree Name</label>
+                                <input type="text" id="programName" name="programName" required class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Bachelor of Science in Computer Science">
+                            </div>
+                            <div>
+                                <label for="graduationDate" class="block text-sm font-medium text-gray-700 mb-1">Graduation Date</label>
+                                <input type="date" id="graduationDate" name="graduationDate" required class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-medium text-gray-700 px-2">Courses & Grades</legend>
+                        <div id="coursesContainer" class="mt-4 space-y-3">
+                            <div class="course-row">
+                                <input type="text" name="courseName[]" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Course Name (e.g., Introduction to Blockchain)" required>
+                                <input type="text" name="courseGrade[]" class="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Grade (e.g., A+)" required>
+                                <button type="button" class="removeCourseBtn bg-red-500 hover:bg-red-600 text-white p-2 rounded-md shadow-sm" onclick="removeCourse(this)" disabled>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" id="addCourseBtn" class="mt-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md shadow-sm flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Add Another Course
+                        </button>
+                    </fieldset>
+
+                    <div class="flex justify-end mt-8">
+                        <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out">
+                            Issue Transcript
+                        </button>
+                    </div>
+                </form>
+
+                <div id="messageArea" class="mt-6 p-4 rounded-md" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div id="content-student" class="form-section" style="display: none;">
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-blue-600 mb-6">Student Portal</h2>
+                <p class="text-gray-600">Welcome, Student! Here you will be able to view your issued academic transcripts.</p>
+                <div class="mt-6">
+                    <label for="viewTranscriptId" class="block text-sm font-medium text-gray-700 mb-1">Enter Transcript ID to View</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="viewTranscriptId" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Transcript ID">
+                        <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm">View</button>
+                    </div>
+                    <div class="mt-4 p-4 border rounded-md bg-gray-50 text-gray-700">
+                        Transcript details will appear here...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-employer" class="form-section" style="display: none;">
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-blue-600 mb-6">Employer/Verification Portal</h2>
+                <p class="text-gray-600">Welcome! Use this portal to verify the authenticity of an academic transcript.</p>
+                 <div class="mt-6">
+                    <label for="verifyTranscriptId" class="block text-sm font-medium text-gray-700 mb-1">Enter Transcript ID to Verify</label>
+                     <div class="flex gap-2">
+                        <input type="text" id="verifyTranscriptId" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Transcript ID">
+                        <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm">Verify</button>
+                    </div>
+                    <div id="verificationResult" class="mt-4 p-4 border rounded-md bg-gray-50 text-gray-700">
+                        Verification status will appear here...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 p-6 mt-12 text-center">
+        <p>&copy; <span id="currentYear"></span> UniCertify. All rights reserved.</p>
+        <p class="text-sm">A demonstration project for secure academic records.</p>
+    </footer>
+
+    <script>
+        // Get current year for footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Tab switching logic
+        const tabs = [
+            { button: document.getElementById('tab-institution'), content: document.getElementById('content-institution') },
+            { button: document.getElementById('tab-student'), content: document.getElementById('content-student') },
+            { button: document.getElementById('tab-employer'), content: document.getElementById('content-employer') }
+        ];
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+
+        tabs.forEach(tab => {
+            tab.button.addEventListener('click', () => {
+                // Hide all content
+                tabs.forEach(t => {
+                    t.content.style.display = 'none';
+                    t.button.classList.remove('active');
+                });
+                // Show clicked tab's content and set button to active
+                tab.content.style.display = 'block';
+                tab.button.classList.add('active');
+            });
+        });
+
+        // Dynamic course adding/removing
+        const coursesContainer = document.getElementById('coursesContainer');
+        const addCourseBtn = document.getElementById('addCourseBtn');
+        let courseCount = 1; // Start with 1 because there's one initial row
+
+        function updateRemoveButtons() {
+            const removeButtons = coursesContainer.querySelectorAll('.removeCourseBtn');
+            removeButtons.forEach((btn, index) => {
+                // Disable remove button if it's the only course row
+                btn.disabled = removeButtons.length === 1;
+            });
+        }
+        updateRemoveButtons(); // Call on initial load
+
+        addCourseBtn.addEventListener('click', () => {
+            courseCount++;
+            const newCourseRow = document.createElement('div');
+            newCourseRow.classList.add('course-row');
+            newCourseRow.innerHTML = `
+                <input type="text" name="courseName[]" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Course Name" required>
+                <input type="text" name="courseGrade[]" class="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Grade" required>
+                <button type="button" class="removeCourseBtn bg-red-500 hover:bg-red-600 text-white p-2 rounded-md shadow-sm" onclick="removeCourse(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            coursesContainer.appendChild(newCourseRow);
+            updateRemoveButtons(); // Update buttons after adding a new row
+        });
+
+        function removeCourse(button) {
+            // Prevent removing if it's the last course row
+            if (coursesContainer.children.length > 1) {
+                button.parentElement.remove();
+                courseCount--;
+                updateRemoveButtons(); // Update buttons after removing a row
+            }
+        }
+
+        
+        // Form submission simulation
+        const issueTranscriptForm = document.getElementById('issueTranscriptForm');
+        const messageArea = document.getElementById('messageArea');
+
+        issueTranscriptForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent actual form submission
+
+            // --- Simulate API Call and Smart Contract Interaction ---
+            // In a real application, you would gather form data and send it to your backend API,
+            // which would then interact with the smart contract.
+
+            const formData = new FormData(issueTranscriptForm);
+            const transcriptData = {
+                studentName: formData.get('studentName'),
+                studentId: formData.get('studentId'),
+                issuingInstitution: formData.get('issuingInstitution'),
+                programName: formData.get('programName'),
+                graduationDate: formData.get('graduationDate'),
+                courses: []
+            };
+
+            const courseNames = formData.getAll('courseName[]');
+            const courseGrades = formData.getAll('courseGrade[]');
+
+            for (let i = 0; i < courseNames.length; i++) {
+                transcriptData.courses.push({
+                    name: courseNames[i],
+                    grade: courseGrades[i]
+                });
+            }
+
+                    
+
+        // --- Actual API Call to Backend ---
+        console.log("Sending Transcript Issuance data to backend:", transcriptData);
+
+        fetch('/api/transcripts/issue', { // Make sure this matches the route in server.js
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(transcriptData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If the server response is not OK (e.g., 400, 500 error)
+                return response.json().then(err => { throw err; });
+            }
+            return response.json(); // Parse JSON response from server
+        })
+        .then(data => {
+            console.log('Success response from backend:', data);
+            messageArea.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                    <p class="font-bold">Success!</p>
+                    <p>${data.message || 'Transcript submitted to backend.'}</p>
+                    <p class="text-xs mt-2">Received Data: ${JSON.stringify(data.data)}</p>
+                </div>
+            `;
+            messageArea.style.display = 'block';
+            // issueTranscriptForm.reset(); // Optionally reset form
+        })
+        .catch((error) => {
+            console.error('Error submitting transcript to backend:', error);
+            messageArea.innerHTML = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                    <p class="font-bold">Error!</p>
+                    <p>${error.message || 'Could not submit transcript. Please try again.'}</p>
+                    ${error.details ? `<p class="text-xs mt-1">Details: ${JSON.stringify(error.details)}</p>` : ''}
+                </div>
+            `;
+            messageArea.style.display = 'block';
+        })
+        .finally(() => {
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, 10000);
+        });
+
+            // Display a success message (simulation)
+            messageArea.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                    <p class="font-bold">Success!</p>
+                    <p>Transcript for ${transcriptData.studentName} (ID: ${transcriptData.studentId}) has been notionally issued.</p>
+                    <p class="text-xs mt-2">Data (for demo): ${JSON.stringify(transcriptData)}</p>
+                </div>
+            `;
+            messageArea.style.display = 'block';
+
+            // Optionally, clear the form
+            // issueTranscriptForm.reset();
+            // coursesContainer.innerHTML = ''; // Clear dynamic courses, then add one back
+            // addCourseBtn.click(); // Add one initial course row back
+            // if (coursesContainer.children.length > 0) coursesContainer.children[0].querySelector('.removeCourseBtn').disabled = true;
+
+
+            // Hide message after a few seconds
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, 10000); // Hide after 10 seconds
+        });
+
+        // Placeholder for Student Portal interaction
+        // document.querySelector('#content-student button').addEventListener('click', () => {
+        //     const transcriptId = document.getElementById('viewTranscriptId').value;
+        //     const detailsArea = document.querySelector('#content-student .border');
+        //     if (transcriptId) {
+        //         detailsArea.textContent = `Fetching details for Transcript ID: ${transcriptId}... (This is a placeholder)`;
+        //     } else {
+        //         detailsArea.textContent = 'Please enter a Transcript ID.';
+        //     }
+        // });
+
+        // Placeholder for Employer Portal interaction
+        // document.querySelector('#content-employer button').addEventListener('click', () => {
+        //     const transcriptId = document.getElementById('verifyTranscriptId').value;
+        //     const resultArea = document.getElementById('verificationResult');
+        //     if (transcriptId) {
+        //         // Simulate verification
+        //         const isValid = Math.random() > 0.3; // Randomly valid or invalid for demo
+        //         if (isValid) {
+        //             resultArea.innerHTML = `<p class="text-green-600 font-semibold">Transcript ID: ${transcriptId} is VERIFIED.</p>`;
+        //         } else {
+        //             resultArea.innerHTML = `<p class="text-red-600 font-semibold">Transcript ID: ${transcriptId} is INVALID or NOT FOUND.</p>`;
+        //         }
+        //     } else {
+        //         resultArea.textContent = 'Please enter a Transcript ID to verify.';
+        //     }
+        // });
+
+    </script>
+</body>
+</html>
