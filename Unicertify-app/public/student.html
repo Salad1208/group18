@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCertify - Student Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transcript-id-button { background-color: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; margin-left: 0.5rem; cursor: pointer; border: none; font-size: 0.875rem; }
+        .transcript-id-button:hover { background-color: #2563eb; }
+    </style>
+</head>
+<body id="studentPage" class="bg-gray-100"> <header class="bg-blue-600 text-white p-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold">UniCertify - Student Portal</h1>
+            <div>
+                <button id="connectWalletBtnOnPage" class="bg-white text-blue-600 font-semibold py-2 px-4 rounded hover:bg-gray-100 mr-2">Connect Wallet</button>
+                <span id="walletAddressOnPage" class="text-sm mr-4"></span>
+                <span id="studentNameDisplay" class="mr-4"></span> <button id="logoutBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded">Go to Login</button>
+            </div>
+        </div>
+    </header>
+    <main class="container mx-auto p-8">
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-blue-600 mb-6">My Academic Transcripts (On-Chain)</h2>
+            <div id="studentTranscriptListArea" class="mb-6">
+                <p class="text-gray-600">Connect your wallet and click "Load My Transcripts" to see your transcript IDs from the blockchain.</p>
+                <button id="loadMyTranscriptsBtn" class="mt-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md shadow-sm">Load My Transcripts</button>
+            </div>
+            <div class="mt-4 p-4 border rounded-md bg-gray-50 text-gray-700 min-h-[200px]" id="studentTranscriptDetailsArea">
+                Select a transcript ID from the list above to view details...
+                </div>
+        </div>
+    </main>
+    <footer class="bg-gray-800 text-gray-300 p-6 mt-12 text-center">
+        <p>&copy; <span id="currentYear">2025</span> UniCertify. All rights reserved.</p>
+    </footer>
+    <script src="scripts.js" defer></script>
+</body>
+</html>
