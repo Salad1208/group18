@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCertify - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">UniCertify</h1>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label for="roleSelectForRedirect" class="block text-sm font-medium text-gray-700">Select Your Portal:</label>
+                <select id="roleSelectForRedirect" name="role" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="institution">Institution Portal</option>
+                    <option value="student">Student Portal</option>
+                    <option value="employer">Employer Portal</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md">Go to Portal</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">You will connect your wallet on the portal page.</p>
+    </div>
+    <script src="scripts.js" defer></script>
+</body>
+</html>
