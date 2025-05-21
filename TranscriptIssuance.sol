@@ -111,6 +111,10 @@ contract TranscriptIssuance is AccessControl {
             courses[i] = Course(courseNames[i], courseGrades[i]);
         }
 
+        _issueTranscriptInternal(
+            _studentName, _studentAddress, _studentId, _issuingInstitution,
+            _programName, _graduationDate, courses
+        );
     }
 
     /**
