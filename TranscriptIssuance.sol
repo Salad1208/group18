@@ -55,7 +55,7 @@ contract TranscriptIssuance is AccessControl {
         address indexed issuer             // Address of the institution account that called issue
     );
 
-    // Event emitted when Transcript is acceped or rejected
+    // Event emitted when Transcript is accepted or rejected
     event TranscriptAccepted(uint256 indexed transcriptId, address indexed student);
     event TranscriptRejected(uint256 indexed transcriptId, address indexed student);
 
@@ -182,6 +182,22 @@ contract TranscriptIssuance is AccessControl {
         return hasRole(INSTITUTION_ROLE, _account);
     }
 
+    
+    // Student accepts the transcript
+    function acceptTranscript(uint256 transcriptId) external {
+    require(_transcripts[transcriptId].studentAddress == msg.sender, "Not your transcript.");
+    require(_transcripts[transcriptId].status == Status.Pending, "Transcript already reviewed.");
+    _transcripts[transcriptId].status = Status.Accepted;
+    emit TranscriptAccepted(transcriptId, msg.sender);
+    }
+    
+    // Student rejects the transcript
+    function rejectTranscript(uint256 transcriptId) external {
+    require(_transcripts[transcriptId].studentAddress == msg.sender, "Not your transcript.");
+    require(_transcripts[transcriptId].status == Status.Pending, "Transcript already reviewed.");
+    _transcripts[transcriptId].status = Status.Rejected;
+     emit TranscriptRejected(transcriptId, msg.sender);
+    }
 
 
     /**
