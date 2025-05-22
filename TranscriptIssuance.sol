@@ -140,10 +140,15 @@ contract TranscriptIssuance is AccessControl {
         newTranscript.issuingInstitution = _issuingInstitution;
         newTranscript.programName = _programName;
         newTranscript.graduationDate = _graduationDate;
-        newTranscript.courses = _courses; // Direct assignment of memory array to storage array
+        //newTranscript.courses = _courses; // Direct assignment of memory array to storage array
         newTranscript.issuerAddress = msg.sender;
         newTranscript.issueTimestamp = block.timestamp;
         newTranscript.isValid = true; // Mark as initialized
+
+        // Store each course individually
+        for (uint i = 0; i <_courses.length; i++){
+            newTranscript.courses.push(_courses[i]);
+        }
 
         _studentTranscripts[_studentAddress].push(newTranscriptId);
 
