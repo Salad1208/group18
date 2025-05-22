@@ -24,30 +24,6 @@ contract TranscriptIssuance is AccessControl {
         string grade;
     }
 
-    /**
-    
-        function loadTranscriptById(uint256 transcriptId) public view returns (
-        address studentAddress,
-        string memory studentName,
-        string memory studentId,
-        string memory issuingInstitution,
-        string memory programName,
-        uint256 graduationDate,
-        address issuerAddress,
-        uint256 issueTimestamp
-        ) {
-        Transcript memory loadtranscript = _transcripts[transcriptId];
-        return (
-        loadtranscript.studentAddress,
-        loadtranscript.studentName,
-        loadtranscript.studentId,
-        loadtranscript.issuingInstitution,
-        loadtranscript.programName,
-        loadtranscript.graduationDate,
-        loadtranscript.issuerAddress,
-        loadtranscript.issueTimestamp
-    );
-
     // Structure to represent an academic transcript
     struct Transcript {
         uint256 id;                 // Unique identifier for the transcript
@@ -183,6 +159,28 @@ contract TranscriptIssuance is AccessControl {
     function getTranscriptById(uint256 _transcriptId) public view returns (Transcript memory) {
         require(_transcripts[_transcriptId].isValid, "TI: Transcript ID not found or invalid.");
         return _transcripts[_transcriptId];
+    }
+    function loadTranscriptById(uint256 transcriptId) public view returns (
+        address studentAddress,
+        string memory studentName,
+        string memory studentId,
+        string memory issuingInstitution,
+        string memory programName,
+        uint256 graduationDate,
+        address issuerAddress,
+        uint256 issueTimestamp
+        ) {
+        Transcript memory loadtranscript = _transcripts[transcriptId];
+        return (
+        loadtranscript.studentAddress,
+        loadtranscript.studentName,
+        loadtranscript.studentId,
+        loadtranscript.issuingInstitution,
+        loadtranscript.programName,
+        loadtranscript.graduationDate,
+        loadtranscript.issuerAddress,
+        loadtranscript.issueTimestamp
+    );
     }
 
     /**
