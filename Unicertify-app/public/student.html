@@ -33,6 +33,21 @@
             <div class="mt-4 p-4 border rounded-md bg-gray-50 text-gray-700 min-h-[200px]" id="studentTranscriptDetailsArea">
                 Select a transcript ID from the list above to view details...
                 </div>
+            
+                <!-- Accept/Reject Buttons -->
+            <div id="actionButtons" class="flex gap-4 mt-6 hidden">
+                <!-- Accept Button -->
+                <button id="acceptTranscriptBtn"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow">
+                    <i class="fas fa-check mr-2"></i>Accept Transcript
+                </button>
+
+                <!-- Reject Button -->
+                <button id="rejectTranscriptBtn"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow">
+                    <i class="fas fa-times mr-2"></i>Reject Transcript
+                </button>
+            </div>
         </div>
     </main>
     <footer class="bg-gray-800 text-gray-300 p-6 mt-12 text-center">
