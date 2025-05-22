@@ -752,6 +752,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 studentTranscriptListArea.innerHTML = '<p class="text-red-500">Could not load IDs.</p>';
             }
         });
+
+		    // === ACCEPT / REJECT BUTTON HANDLERS ===
+   		const acceptBtn = document.getElementById("acceptTranscriptBtn");
+    	const rejectBtn = document.getElementById("rejectTranscriptBtn");
+
+   		 if (acceptBtn && rejectBtn) {
+        	async function acceptTranscript() {
+            	if (!contract || !userAddress || !window.selectedTranscriptId) {
+                	alert("Missing contract, wallet, or selected transcript.");
+                	return;
+            	}
+            	try {
+                	const tx = await contract.acceptTranscript(window.selectedTranscriptId);
+                	await tx.wait();
+                	alert("✅ Transcript accepted!");
+                	document.getElementById("actionButtons").classList.add("hidden");
+            	} catch (err) {
+                	console.error("Accept failed:", err);
+                	alert("❌ Failed to accept: " + (err.reason || err.message));
+            	}
+        	}
+
+        	async function rejectTranscript() {
+            	if (!contract || !userAddress || !window.selectedTranscriptId) {
+                	alert("Missing contract, wallet, or selected transcript.");
+                	return;
+            	}
+            	try {
+                	const tx = await contract.rejectTranscript(window.selectedTranscriptId);
+                	await tx.wait();
+                	alert("❌ Transcript rejected!");
+                	document.getElementById("actionButtons").classList.add("hidden");
+            	} catch (err) {
+                	console.error("Reject failed:", err);
+                	alert("❌ Failed to reject: " + (err.reason || err.message));
+            	}
+        	}
+
+        	acceptBtn.addEventListener('click', acceptTranscript);
+        	rejectBtn.addEventListener('click', rejectTranscript);
+    	}
     }
 
     window.viewSpecificOnChainTranscript = async function(transcriptId) {
@@ -759,6 +800,9 @@ document.addEventListener('DOMContentLoaded', () => {
              studentTranscriptDetailsArea.textContent = 'Wallet not connected or provider not ready.';
              return;
         }
+
+		window.selectedTranscriptId = transcriptId;
+
         studentTranscriptDetailsArea.textContent = `Workspaceing Transcript ID: ${transcriptId}...`;
         try {
             const readOnlyContract = new ethers.Contract(contractAddress, contractAbi, provider);
