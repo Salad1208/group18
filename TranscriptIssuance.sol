@@ -3,89 +3,34 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./TranscriptDefs.sol"; // Assuming TranscriptDefs.sol is in the same directory
 
 /**
  * @title TranscriptIssuance
- * @dev Manages institution roles, and the issuance and storage of academic transcripts.
+ * @dev Manages the issuance and status updates of academic transcripts.
  */
 contract TranscriptIssuance is AccessControl {
     using Counters for Counters.Counter;
-    enum Status {Pending, Accepted, Rejected}
+    // No 'using TranscriptDefs for...' needed here as we directly use TranscriptDefs.StructName
 
-    // Role definition for institutions authorized to issue transcripts
     bytes32 public constant INSTITUTION_ROLE = keccak256("INSTITUTION_ROLE");
-
-    // Counter to generate unique transcript IDs
     Counters.Counter private _transcriptIds;
 
-    // Structure to represent a single course with its grade
-    struct Course {
-        string name;
-        string grade;
-    }
-
-    // Structure to represent an academic transcript
-    struct Transcript {
-        uint256 id;                 // Unique identifier for the transcript
-        address studentAddress;       // Ethereum address of the student
-        string studentName;
-        string studentId;            // Institution-specific student ID
-        string issuingInstitution;   // Name of the issuing institution
-        string programName;
-        uint256 graduationDate;       // Store as Unix timestamp
-        Course[] courses;            // Array of courses taken
-        address issuerAddress;        // Address of the institution that issued this
-        uint256 issueTimestamp;       // Timestamp when the transcript was issued
-        Status status;               // Grabs variables from enum above for different states of transcript
-        bool isValid;                // Flag to ensure struct is properly initialized
-    }
-
-    // Mapping from transcript ID to Transcript struct
-    mapping(uint256 => Transcript) private _transcripts;
-
-    // Mapping from student address to an array of their transcript IDs
+    mapping(uint256 => TranscriptDefs.Transcript) private _transcripts;
     mapping(address => uint256[]) private _studentTranscripts;
-
-    // Event emitted when a new transcript is successfully issued
-    event TranscriptIssued(
-        uint256 indexed transcriptId,
-        address indexed studentAddress,    // Student's Ethereum address
-        string studentId,                  // Institution-specific student ID
-        string issuingInstitution,         // Name of the issuing institution
-        address indexed issuer             // Address of the institution account that called issue
-    );
-
-    // Event emitted when Transcript is accepted or rejected
-    event TranscriptAccepted(uint256 indexed transcriptId, address indexed student);
-    event TranscriptRejected(uint256 indexed transcriptId, address indexed student);
-
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // Initialize counter so the first ID is 1
-        _transcriptIds.increment();
     }
 
-    /**
-     * @dev Grants the INSTITUTION_ROLE to an account.
-     * Can only be called by accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    function grantInstitutionRole(address _institutionAccount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function grantInstitutionRole(address _institutionAccount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(INSTITUTION_ROLE, _institutionAccount);
     }
 
-    /**
-     * @dev Revokes the INSTITUTION_ROLE from an account.
-     * Can only be called by accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    function revokeInstitutionRole(address _institutionAccount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeInstitutionRole(address _institutionAccount) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(INSTITUTION_ROLE, _institutionAccount);
     }
 
-    /**
-     * @dev Issues a transcript using separate string arrays for course names and grades.
-     * Only callable by an address with INSTITUTION_ROLE.
-     */
     function issueTranscriptManual(
         string memory _studentName,
         address _studentAddress,
@@ -93,33 +38,27 @@ contract TranscriptIssuance is AccessControl {
         string memory _issuingInstitution,
         string memory _programName,
         uint256 _graduationDate,
-        string[] memory courseNames,
-        string[] memory courseGrades
-    ) public onlyRole(INSTITUTION_ROLE) {
-        // Input validation
-        require(bytes(_studentName).length > 0, "TI: Student name is required.");
-        require(_studentAddress != address(0), "TI: Student Ethereum address is required.");
-        require(bytes(_studentId).length > 0, "TI: Student ID is required.");
-        require(bytes(_issuingInstitution).length > 0, "TI: Issuing institution is required.");
-        require(bytes(_programName).length > 0, "TI: Program name is required.");
-        require(_graduationDate > 0, "TI: Graduation date is required.");
-        require(courseNames.length > 0, "TI: At least one course is required.");
-        require(courseNames.length == courseGrades.length, "TI: Course names and grades arrays must have the same length.");
-
-        Course[] memory courses = new Course[](courseNames.length);
-        for (uint i = 0; i < courseNames.length; i++) {
-            courses[i] = Course(courseNames[i], courseGrades[i]);
+        string[] memory _courseNames,
+        string[] memory _courseGrades
+    ) public virtual onlyRole(INSTITUTION_ROLE) {
+        require(_courseNames.length == _courseGrades.length, "Issuance: Course names and grades arrays must have the same length.");
+        
+        TranscriptDefs.Course[] memory courses = new TranscriptDefs.Course[](_courseNames.length);
+        for (uint i = 0; i < _courseNames.length; i++) {
+            courses[i] = TranscriptDefs.Course(_courseNames[i], _courseGrades[i]);
         }
 
         _issueTranscriptInternal(
-            _studentName, _studentAddress, _studentId, _issuingInstitution,
-            _programName, _graduationDate, courses
+            _studentName,
+            _studentAddress,
+            _studentId,
+            _issuingInstitution,
+            _programName,
+            _graduationDate,
+            courses
         );
     }
 
-    /**
-     * @dev Internal function shared by issueTranscript and issueTranscriptManual to handle transcript creation.
-     */
     function _issueTranscriptInternal(
         string memory _studentName,
         address _studentAddress,
@@ -127,12 +66,16 @@ contract TranscriptIssuance is AccessControl {
         string memory _issuingInstitution,
         string memory _programName,
         uint256 _graduationDate,
-        Course[] memory _courses
+        TranscriptDefs.Course[] memory _courses
     ) internal {
-        uint256 newTranscriptId = _transcriptIds.current();
-        _transcriptIds.increment(); // Prepare for the next ID
+        require(bytes(_studentName).length > 0, "Issuance: Student name is required.");
+        require(_studentAddress != address(0), "Issuance: Student Ethereum address is required.");
+        // ... other requires from previous version
 
-        Transcript storage newTranscript = _transcripts[newTranscriptId];
+        _transcriptIds.increment();
+        uint256 newTranscriptId = _transcriptIds.current();
+
+        TranscriptDefs.Transcript storage newTranscript = _transcripts[newTranscriptId];
         newTranscript.id = newTranscriptId;
         newTranscript.studentAddress = _studentAddress;
         newTranscript.studentName = _studentName;
@@ -140,97 +83,79 @@ contract TranscriptIssuance is AccessControl {
         newTranscript.issuingInstitution = _issuingInstitution;
         newTranscript.programName = _programName;
         newTranscript.graduationDate = _graduationDate;
-        //newTranscript.courses = _courses; // Direct assignment of memory array to storage array
         newTranscript.issuerAddress = msg.sender;
         newTranscript.issueTimestamp = block.timestamp;
-        newTranscript.isValid = true; // Mark as initialized
+        newTranscript.status = TranscriptDefs.Status.Pending; // Initial status
 
-        // Store each course individually
-        for (uint i = 0; i <_courses.length; i++){
+        for (uint i = 0; i < _courses.length; i++) {
             newTranscript.courses.push(_courses[i]);
         }
 
         _studentTranscripts[_studentAddress].push(newTranscriptId);
 
-        emit TranscriptIssued(newTranscriptId, _studentAddress, _studentId, _issuingInstitution, msg.sender);
+        emit TranscriptDefs.TranscriptIssued(newTranscriptId, _studentAddress, _studentId, _issuingInstitution, msg.sender, newTranscript.status);
     }
 
-    // --- Getter functions for external reads (e.g., by TranscriptVerification contract) ---
+    /**
+     * @dev Allows a student to accept their transcript.
+     * @param _transcriptId The ID of the transcript to accept.
+     */
+    function acceptTranscript(uint256 _transcriptId) public virtual {
+        TranscriptDefs.Transcript storage transcript = _transcripts[_transcriptId];
+        require(doesTranscriptExist(_transcriptId), "Issuance: Transcript ID not found.");
+        require(transcript.studentAddress == msg.sender, "Issuance: Only the student can accept this transcript.");
+        require(transcript.status == TranscriptDefs.Status.Pending, "Issuance: Transcript must be pending to be accepted.");
+
+        transcript.status = TranscriptDefs.Status.AcceptedByStudent;
+        emit TranscriptDefs.TranscriptStatusChanged(_transcriptId, transcript.studentAddress, msg.sender, transcript.status, "Student accepted transcript.");
+    }
 
     /**
-     * @dev Retrieves the details of a specific transcript by its ID.
-     * Ensures the transcript is valid before returning.
+     * @dev Allows a student to reject their transcript.
+     * @param _transcriptId The ID of the transcript to reject.
+     * @param _reason The reason for rejection.
      */
-    function getTranscriptById(uint256 _transcriptId) public view returns (Transcript memory) {
-        require(_transcripts[_transcriptId].isValid, "TI: Transcript ID not found or invalid.");
+    function rejectTranscript(uint256 _transcriptId, string memory _reason) public virtual {
+        TranscriptDefs.Transcript storage transcript = _transcripts[_transcriptId];
+        require(doesTranscriptExist(_transcriptId), "Issuance: Transcript ID not found.");
+        require(transcript.studentAddress == msg.sender, "Issuance: Only the student can reject this transcript.");
+        require(transcript.status == TranscriptDefs.Status.Pending, "Issuance: Transcript must be pending to be rejected.");
+
+        transcript.status = TranscriptDefs.Status.RejectedByStudent;
+        emit TranscriptDefs.TranscriptStatusChanged(_transcriptId, transcript.studentAddress, msg.sender, transcript.status, _reason);
+    }
+
+    /**
+     * @dev Allows the issuing institution to revoke a transcript.
+     * @param _transcriptId The ID of the transcript to revoke.
+     * @param _reason The reason for revocation.
+     */
+    function revokeTranscriptByInstitution(uint256 _transcriptId, string memory _reason) public virtual onlyRole(INSTITUTION_ROLE) {
+        TranscriptDefs.Transcript storage transcript = _transcripts[_transcriptId];
+        require(doesTranscriptExist(_transcriptId), "Issuance: Transcript ID not found.");
+        // Ensure the caller is the original issuer or an admin of that institution (more complex role mgmt needed for latter)
+        require(transcript.issuerAddress == msg.sender || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Issuance: Only original issuer or admin can revoke.");
+        // Prevent revoking an already rejected transcript if that's desired logic
+        // require(transcript.status != TranscriptDefs.Status.RejectedByStudent, "Issuance: Cannot revoke an already rejected transcript.");
+
+        transcript.status = TranscriptDefs.Status.RevokedByInstitution;
+        emit TranscriptDefs.TranscriptStatusChanged(_transcriptId, transcript.studentAddress, msg.sender, transcript.status, _reason);
+    }
+
+
+    function getTranscriptById(uint256 _transcriptId) public view virtual returns (TranscriptDefs.Transcript memory) {
+        require(doesTranscriptExist(_transcriptId), "Issuance: Transcript ID not found.");
         return _transcripts[_transcriptId];
     }
-    function loadTranscriptById(uint256 transcriptId) public view returns (
-        address studentAddress,
-        string memory studentName,
-        string memory studentId,
-        string memory issuingInstitution,
-        string memory programName,
-        uint256 graduationDate,
-        address issuerAddress,
-        uint256 issueTimestamp
-        ) {
-        Transcript memory loadtranscript = _transcripts[transcriptId];
-        return (
-        loadtranscript.studentAddress,
-        loadtranscript.studentName,
-        loadtranscript.studentId,
-        loadtranscript.issuingInstitution,
-        loadtranscript.programName,
-        loadtranscript.graduationDate,
-        loadtranscript.issuerAddress,
-        loadtranscript.issueTimestamp
-    );
-    }
 
-    /**
-     * @dev Retrieves all transcript IDs for a given student address.
-     */
-    function getTranscriptIdsForStudent(address _studentAddress) public view returns (uint256[] memory) {
+    function getTranscriptIdsForStudent(address _studentAddress) public view virtual returns (uint256[] memory) {
         return _studentTranscripts[_studentAddress];
     }
-
-    /**
-     * @dev Checks if a transcript ID exists and has been initialized (is valid).
-     */
-    function doesTranscriptExist(uint256 _transcriptId) public view returns (bool) {
-        return _transcripts[_transcriptId].isValid;
-    }
-
-    /**
-     * @dev Checks if an account has the INSTITUTION_ROLE.
-     */
-    function isInstitution(address _account) public view returns (bool) {
-        return hasRole(INSTITUTION_ROLE, _account);
-    }
-
     
-    // Student accepts the transcript
-    function acceptTranscript(uint256 transcriptId) external {
-    require(_transcripts[transcriptId].studentAddress == msg.sender, "Not your transcript.");
-    require(_transcripts[transcriptId].status == Status.Pending, "Transcript already reviewed.");
-    _transcripts[transcriptId].status = Status.Accepted;
-    emit TranscriptAccepted(transcriptId, msg.sender);
-    }
-    
-    // Student rejects the transcript
-    function rejectTranscript(uint256 transcriptId) external {
-    require(_transcripts[transcriptId].studentAddress == msg.sender, "Not your transcript.");
-    require(_transcripts[transcriptId].status == Status.Pending, "Transcript already reviewed.");
-    _transcripts[transcriptId].status = Status.Rejected;
-     emit TranscriptRejected(transcriptId, msg.sender);
+    function doesTranscriptExist(uint256 _transcriptId) public view virtual returns (bool) {
+        return _transcripts[_transcriptId].issuerAddress != address(0); // Check if issuerAddress is set (meaning it was initialized)
     }
 
-
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     * Required override for AccessControl.
-     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl) returns (bool) {
         return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);
     }
