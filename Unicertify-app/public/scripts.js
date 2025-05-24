@@ -817,6 +817,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+	// Function for Employee to load transcript 
+	async function loadTranscriptForEmployer() {
+    const studentAddress = document.getElementById("studentAddressInput").value;
+
+    // Get transcript IDs
+    const transcriptIds = await contract.methods.getTranscriptIdsForStudent(studentAddress).call();
+    if (transcriptIds.length === 0) {
+        alert("No transcript found for this address.");
+        return;
+    }
+
+    const transcriptId = transcriptIds[0];
+
+    // Load transcript by ID
+    const transcript = await contract.methods.loadTranscriptById(transcriptId).call();
+
+    // Display transcript on page
+    document.getElementById("studentName").innerText = transcript.studentName;
+    document.getElementById("studentId").innerText = transcript.studentId;
+    document.getElementById("institution").innerText = transcript.issuingInstitution;
+    document.getElementById("program").innerText = transcript.programName;
+    document.getElementById("gradDate").innerText = new Date(transcript.graduationDate * 1000).toDateString();
+}
 
     // --- Footer Year ---
     const currentYearEl = document.getElementById('currentYear');
