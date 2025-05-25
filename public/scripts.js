@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     // --- TranscriptIssuance Contract Details ---
-    const issuanceContractAddress = "0x643758a05b70bcc930cf33007848aaceb212ac03"; 
+    const issuanceContractAddress = "0x3eff9ad8e31e375e4b40f58efedf3da37d00717c"; 
 
-    const verificationContractAddress = "0x2888cfc5114a05d33530aeff474daa5c8ef097f5"; 
+    const verificationContractAddress = "0xd4cd826eb69021b80c320ceedd39ac2e393b3cc7"; 
 
     const issuanceContractAbi = [
         { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
