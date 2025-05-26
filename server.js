@@ -12,12 +12,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
-// Route to serve the main login page for the off-chain version
+// Route to serve the main index page for the off-chain version
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Optional: If you want direct routes to other pages (though navigation will be via login)
+// Optional: If you want direct routes to other pages (though navigation will be via index)
 app.get('/institution', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'institution.html'));
 });
@@ -60,5 +60,5 @@ app.post('/api/transcripts/issue', (req, res) => {
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    console.log('UniCertify off-chain demo is accessible. Start with /login.html or /');
+    console.log('UniCertify off-chain demo is accessible. Start with /index.html or /');
 });
