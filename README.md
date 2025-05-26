@@ -112,13 +112,6 @@ Before you begin, ensure you have the following installed/set up:
       // ...
       const verificationContractAddress = "YOUR_DEPLOYED_TRANSCRIPT_VERIFICATION_ADDRESS"; 
       ```
-
-   c. **Update ABIs**:
-      * In Remix, after compiling `TranscriptIssuance.sol`, go to the "Solidity compiler" tab. Click the "Compilation Details" button for `TranscriptIssuance` (often looks like a document or ABI icon). Copy the entire JSON ABI array.
-      * Paste this full ABI into the `issuanceContractAbi` variable in `public/scripts.js`.
-      * Repeat for `TranscriptVerification.sol`: compile it, get its ABI from "Compilation Details", and paste it into the `verificationContractAbi` variable in `public/scripts.js`.
-      * *The `scripts.js` file provided in previous Canvas updates should have the correct structure for these ABIs if you used the provided Solidity code.*
-
 **Step 3: Run the Local Web Server**
 
    a. **Navigate to your project's root directory** in your terminal/command prompt (the directory containing `server.js` and the `public` folder).
